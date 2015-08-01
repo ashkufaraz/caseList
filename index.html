@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <title>Ember and Process Maker</title>
+    <link rel="stylesheet" href="css/normalize.css">
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/bootstrap.min.css">
+</head>
+
+<body >
+    <script type="text/x-handlebars">
+        {{outlet}}
+    </script>
+
+    <script type="text/x-handlebars" data-template-name="index">
+        <div class="container center_div panel " >
+            <div class="row ">
+                <div class="col-md-12 col-sm-12 col-lg-12 ">
+                    <form role="form">
+                        <div class="page-header">
+                            <h1>Please enter your credentials below</h1>
+                        </div>
+                        <div class="form-group  ">
+                            {{input value=username type="text" placeholder="Username" }}
+                        </div>
+                        <div class="form-group">
+                            {{input value=password type="password" placeholder="Password"}}
+                        </div>
+                        <div class="form-group">
+                            {{input value=workspace type="text" placeholder="Workspace(like:workflow)"}}
+                        </div>
+                        <div class="form-group">
+                            {{input value=client_id type="text" placeholder="Client ID"}}
+                        </div>
+                        <div class="form-group">
+                            {{input value=client_secret type="text" placeholder="Client Secret"}}
+                        </div>
+                        <div class="form-group">
+                            {{input value=serverAddress type="text" placeholder="Server Address(like:Server.com)"}}
+                        </div>
+
+                        <button type="submit" class="btn" {{action 'login'}}>Log in!</button>
+
+
+                    </form>
+			 
+					<form role="form">
+                        <div class="page-header">
+                            <h1>OR using "authorization_code" grant type</h1>
+                        </div>
+                         
+                        <div class="form-group">
+                            {{input value=workspace2 type="text" placeholder="Workspace(like:workflow)"}}
+                        </div>
+                        <div class="form-group">
+                            {{input value=client_id2 type="text" placeholder="Client ID"}}
+                        </div>                        
+                        <div class="form-group">
+                            {{input value=serverAddress2 type="text" placeholder="Server Address(like:Server.com)"}}
+                        </div>
+
+                        <button type="submit" class="btn" {{action 'login2'}}>Log in!</button>
+
+
+                    </form>
+                </div>
+            </div>
+        </div>
+
+    </script>
+    <script type="text/x-handlebars" id="cases">
+		<div class="table-responsive">
+		<h1>Inbox</h1>
+			<table class='table table-bordered table-hover col-sm-12 col-lg-12 col-md-12'>
+				<tr>
+					<th>#</th>
+					<th>Case</th>
+					<th>Process</th>
+					<th>Task</th>
+					<th>Sent By</th>
+					<th>Due Date</th>
+					<th>Last Modify</th>
+					<th>Prority</th>
+					<th>View Form</th>
+				</tr>
+			{{#each todo in model}} 
+				<tr >
+					<td>{{todo.app_number}}</td>
+					<td>{{todo.app_title}}</td>
+					<td>{{todo.app_pro_title}}</td>
+					<td>{{todo.app_tas_title}}</td>					
+					<td>{{todo.previous_usr_username}}</td>										
+					<td>{{todo.del_task_due_date}}</td>														
+					<td>{{todo.app_update_date}}</td>														
+					<td>{{todo.del_priority}}</td>																			
+					<td><a {{bind-attr href=todo.caseAddress}}><img src='images/View_Details-.png'/></a></td>																			
+				</tr>
+				
+				
+			{{/each}}
+			</table>
+		</div>
+		{{outlet}}
+    </script>
+
+    <script src="js/libs/jquery-1.10.2.js"></script>
+    <script src="js/libs/handlebars-1.1.2.js"></script>
+    <script src="js/libs/ember-1.6.1.js"></script>
+    <script src="js/app.js"></script>
+
+
+</body>
+
+</html>

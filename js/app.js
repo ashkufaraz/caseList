@@ -51,7 +51,7 @@ App.IndexController = Ember.Controller.extend({
                         }
                     })
                     .fail(function(data, statusText, xhr) {
-                        alert("Failed to connect.\nHTTP status code: " + xhr.status + ' ' + statusText);
+                        alert("Failed to connect.\nHTTP status code: " + xhr.status + ' ' + statusText+ ' \nError:' + data.responseJSON.error );
                     });
             } else
                 alert('All field is required!!!');
@@ -119,33 +119,36 @@ App.CasesRoute = Ember.Route.extend({
                         }
                     })
                     .fail(function(data, statusText, xhr) {
-                        alert("Failed to connect.\nHTTP status code: " + xhr.status + ' ' + statusText);
+                        alert("Failed to connect.\nHTTP status code: " + xhr.status + ' ' + statusText+ ' \nError:' + data.responseJSON.error );
+						return "";
                     });			
 		}
 		else			
 		{
 			access_token=params.access_token;
 		}
-			var addressCases="http://"	+	params.server +	"/api/1.0/"	+	params.workspace	+"/cases";
-			 return $.ajax({
-				url: addressCases,
-				type: "GET",
-				contentType: false,
-				beforeSend: function(request) {
-					request.setRequestHeader("Authorization", "Bearer " + access_token);
-				},
-				success: function(data) {
-					var addressAccess="http://"	+	params.server +	"/sys"	+	params.workspace	+"/en/neoclassic/cases/";
-					 $.each(data, function(i, item) {
-						data[i]['caseAddress']=addressAccess+"cases_Open?APP_UID="+data[i]['app_uid']+"&DEL_INDEX="+data[i]['del_index']+"&action=todo";
-					}); 
-				
-					return data;
-				},error:function(data, statusText, xhr) {
-							alert("Failed to connect.\nHTTP status code: " + xhr.status + ' ' + statusText);
-				 }
+		if(access_token=="")
+			return "";
+		var addressCases="http://"	+	params.server +	"/api/1.0/"	+	params.workspace	+"/cases";
+		 return $.ajax({
+			url: addressCases,
+			type: "GET",
+			contentType: false,
+			beforeSend: function(request) {
+				request.setRequestHeader("Authorization", "Bearer " + access_token);
+			},
+			success: function(data) {
+				var addressAccess="http://"	+	params.server +	"/sys"	+	params.workspace	+"/en/neoclassic/cases/";
+				 $.each(data, function(i, item) {
+					data[i]['caseAddress']=addressAccess+"cases_Open?APP_UID="+data[i]['app_uid']+"&DEL_INDEX="+data[i]['del_index']+"&action=todo";
+				}); 
+			
+				return data;
+			},error:function(data, statusText, xhr) {console.log(data);
+						alert("Failed to connect.\nHTTP status code: " + xhr.status + ' ' + statusText+ ' \nError:' + data.responseJSON.error.message );
+			 }
 
-			});
+		});
 		
     }
 });

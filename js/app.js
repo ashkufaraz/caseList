@@ -1,6 +1,6 @@
 App = Ember.Application.create();
 App.Router.map(function() {
-      this.route("cases", { path: '/cases/:access_token/:server/:workspace' });
+      this.route("cases", { path: '/cases/:access_token/:server/:workspace/:client_id/:client_secret' });
 });
 
 //Get Access Token
@@ -45,7 +45,7 @@ App.IndexController = Ember.Controller.extend({
                             document.cookie = "access_token=" + data.access_token + "; expires=" + d.toUTCString();
                             document.cookie = "refresh_token=" + data.refresh_token; //refresh token doesn't expire
 
-                            self.transitionToRoute('cases',data.access_token,server,workspace);
+                            self.transitionToRoute('cases',data.access_token,server,workspace,client_id,client_secret);
                         } else {
                             alert(JSON.stringify(data, null, 4)); //for debug
                         }
@@ -81,26 +81,87 @@ App.IndexController = Ember.Controller.extend({
 
 //Get List Case
 App.CasesRoute = Ember.Route.extend({
+	 
     model: function(params) { 
-		var addressCases="http://"	+	params.server +	"/api/1.0/"	+	params.workspace	+"/cases";
-        return $.ajax({
-            url: addressCases,
-            type: "GET",
-            contentType: false,
-            beforeSend: function(request) {
-                request.setRequestHeader("Authorization", "Bearer " + params.access_token);
-            },
-            success: function(data) {
-				var addressAccess="http://"	+	params.server +	"/sys"	+	params.workspace	+"/en/neoclassic/cases/";
-				 $.each(data, function(i, item) {
-					data[i]['caseAddress']=addressAccess+"cases_Open?APP_UID="+data[i]['app_uid']+"&DEL_INDEX="+data[i]['del_index']+"&action=todo";
-				}); 
-			
-                return data;
-            },error:function(data, statusText, xhr) {
-                        alert("Failed to connect.\nHTTP status code: " + xhr.status + ' ' + statusText);
-             }
+		//params.queryParams.code is undefined
+		//callBack:http://192.168.0.40/caseList/index.html#/cases/x/codechallenge.processmaker.io/workflow/YWEATDYCAEBAUXNXAMTNSOVSWCAIWUNU/66453249555bfcddfa6f920097209037
+		var code=window.location.search.split('=')[1];
+		var access_token="";
+		 console.log(params);
+		if(code!=undefined){
+			var addressAccessToken="http://"	+	params.server +	"/"	+	params.workspace	+"/oauth2/token"; 
+			 var jqxhr = $.ajax({
+                        type: "POST",
+                        url: addressAccessToken,
+                        dataType: 'json',
+                        data: {
+                            grant_type: 'authorization_code',
+                            scope: '*',
+                            code: code,
+                            client_id: params.client_id,
+                            client_secret: params.client_secret
+                        }
+                    })
+                    .done(function(data) {
+                        if (data.error) {
+                            alert("Error in login!\nError: " + data.error + "\nDescription: " + data.error_description);
+                        } else if (data.access_token) {                      
+                            var d = new Date();
+                            d.setTime(d.getTime() + 60 * 60 * 1000);
 
-        });
+                            document.cookie = "access_token=" + data.access_token + "; expires=" + d.toUTCString();
+                            document.cookie = "refresh_token=" + data.refresh_token; //refresh token doesn't expire
+
+                            var addressCases="http://"	+	params.server +	"/api/1.0/"	+	params.workspace	+"/cases";
+							 return $.ajax({
+								url: addressCases,
+								type: "GET",
+								contentType: false,
+								beforeSend: function(request) {
+									request.setRequestHeader("Authorization", "Bearer " +data.access_token);
+								},
+								success: function(data) {
+									var addressAccess="http://"	+	params.server +	"/sys"	+	params.workspace	+"/en/neoclassic/cases/";
+									 $.each(data, function(i, item) {
+										data[i]['caseAddress']=addressAccess+"cases_Open?APP_UID="+data[i]['app_uid']+"&DEL_INDEX="+data[i]['del_index']+"&action=todo";
+									}); 
+								
+									return data;
+								},error:function(data, statusText, xhr) {
+											alert("Failed to connect.\nHTTP status code: " + xhr.status + ' ' + statusText);
+								 }
+
+							});
+                        } else {
+                            alert(JSON.stringify(data, null, 4)); //for debug
+                        }
+                    })
+                    .fail(function(data, statusText, xhr) {
+                        alert("Failed to connect.\nHTTP status code: " + xhr.status + ' ' + statusText);
+                    });			
+		}
+		else			
+		{ 
+			var addressCases="http://"	+	params.server +	"/api/1.0/"	+	params.workspace	+"/cases";
+			 return $.ajax({
+				url: addressCases,
+				type: "GET",
+				contentType: false,
+				beforeSend: function(request) {
+					request.setRequestHeader("Authorization", "Bearer " + params.access_token);
+				},
+				success: function(data) {
+					var addressAccess="http://"	+	params.server +	"/sys"	+	params.workspace	+"/en/neoclassic/cases/";
+					 $.each(data, function(i, item) {
+						data[i]['caseAddress']=addressAccess+"cases_Open?APP_UID="+data[i]['app_uid']+"&DEL_INDEX="+data[i]['del_index']+"&action=todo";
+					}); 
+				
+					return data;
+				},error:function(data, statusText, xhr) {
+							alert("Failed to connect.\nHTTP status code: " + xhr.status + ' ' + statusText);
+				 }
+
+			});
+		}
     }
 });
